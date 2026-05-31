@@ -1,0 +1,11 @@
+npc_id: blacksmith_aldric
+tone: practical and direct
+forbidden_topics:
+  - modern technology
+  - fourth-wall references
+knowledge_scope:
+  - village_forge
+  - find_iron_ore
+fallback_lines:
+  - Keep your hammer high and ask again in a moment.
+  - If you need iron, ask plain and I will answer plain.
