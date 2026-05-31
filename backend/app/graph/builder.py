@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import warnings
+import sqlite3
 from typing import Any
 
 from langgraph.checkpoint.memory import MemorySaver
@@ -37,8 +39,18 @@ def create_checkpointer(sqlite_path: str | None = None):
     try:
         from langgraph.checkpoint.sqlite import SqliteSaver
 
-        return SqliteSaver.from_conn_string(f"sqlite:///{sqlite_path}")
-    except Exception:
+        connection = sqlite3.connect(sqlite_path, check_same_thread=False)
+        saver = SqliteSaver(connection)
+        saver.setup()
+        return saver
+    except Exception as exc:
+        warnings.warn(
+            "SQLite checkpointing requested but langgraph-checkpoint-sqlite is unavailable; "
+            "falling back to in-memory checkpoints. Install backend dependencies to persist state. "
+            f"Original error: {exc}",
+            RuntimeWarning,
+            stacklevel=2,
+        )
         return MemorySaver()
 
 
@@ -50,7 +62,7 @@ def build_graph(
 ):
     graph = StateGraph(DialogueState)
 
-    graph.add_node("classify_intent", classify_intent)
+    graph.add_node("classify_intent", lambda state: classify_intent(state, model_adapter=model_adapter))
     graph.add_node("retrieve_lore", lambda state: retrieve_lore(state, lore_store=lore_store))
     graph.add_node("build_prompt", build_prompt)
     graph.add_node("generate_draft", lambda state: generate_draft(state, model_adapter=model_adapter))

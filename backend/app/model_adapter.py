@@ -42,7 +42,18 @@ class OllamaAdapter:
             except (json.JSONDecodeError, ValidationError) as exc:
                 last_error = exc
 
-        fallback = {field_name: "unknown" for field_name in schema_hint.model_fields}
-        if "error" in schema_hint.model_fields:
-            fallback["error"] = str(last_error) if last_error else "json_parse_failed"
-        return schema_hint.model_validate(fallback).model_dump()
+        try:
+            return schema_hint.model_validate({}).model_dump()
+        except ValidationError:
+            fallback: dict[str, Any] = {}
+            for field_name, field_info in schema_hint.model_fields.items():
+                annotation = field_info.annotation
+                if annotation is bool:
+                    fallback[field_name] = False
+                elif annotation in (dict, dict[str, Any]):
+                    fallback[field_name] = {}
+                else:
+                    fallback[field_name] = "unknown"
+            if "error" in schema_hint.model_fields:
+                fallback["error"] = str(last_error) if last_error else "json_parse_failed"
+            return schema_hint.model_validate(fallback).model_dump()

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -26,15 +27,28 @@ class LoreStore:
         raw = json.loads(self.index_path.read_text(encoding="utf-8"))
         return [LoreChunk(**item) for item in raw]
 
+    @staticmethod
+    def _tokens(text: str) -> set[str]:
+        return set(re.findall(r"[a-z0-9]+", text.lower()))
+
     def retrieve(self, npc_id: str, location: str, query: str, top_k: int = 3) -> list[LoreChunk]:
-        terms = set(query.lower().split())
+        terms = self._tokens(query)
 
         def score(chunk: LoreChunk) -> int:
             if chunk.npc_id not in (None, npc_id):
                 return -1
-            base = 2 if chunk.location in (None, location) else 0
-            overlap = sum(1 for token in terms if token in chunk.text.lower())
-            return base + overlap
+            if chunk.location not in (None, location):
+                return -1
+            chunk_terms = self._tokens(chunk.text)
+            metadata_bonus = 0
+            if chunk.npc_id == npc_id:
+                metadata_bonus += 3
+            if chunk.location == location:
+                metadata_bonus += 2
+            if chunk.quest_id and chunk.quest_id in terms:
+                metadata_bonus += 1
+            overlap = len(terms & chunk_terms)
+            return metadata_bonus + overlap
 
         ranked = [chunk for chunk in self.chunks if score(chunk) >= 0]
         ranked.sort(key=score, reverse=True)

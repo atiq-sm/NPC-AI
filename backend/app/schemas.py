@@ -33,6 +33,9 @@ class DialogueDebug(BaseModel):
     retry_count: int = 0
     lore_chunks_used: int = 0
     validation_errors: list[str] = Field(default_factory=list)
+    dropped_effects: list[dict[str, Any]] = Field(default_factory=list)
+    model_latency_ms: float = 0.0
+    total_latency_ms: float = 0.0
 
 
 class DialogueTurnResponse(BaseModel):

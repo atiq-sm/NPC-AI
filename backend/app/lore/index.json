@@ -8,6 +8,14 @@
     "source_path": "app/lore/blacksmith_aldric.md"
   },
   {
+    "text": "He trusts practical folk and prefers concise answers.",
+    "npc_id": "blacksmith_aldric",
+    "location": "village_forge",
+    "quest_id": "find_iron_ore",
+    "spoiler_level": 0,
+    "source_path": "app/lore/blacksmith_aldric.md"
+  },
+  {
     "text": "Aldric says the old mine north of town once had rich iron ore before a cave-in.",
     "npc_id": "blacksmith_aldric",
     "location": "village_forge",
@@ -25,6 +33,14 @@
   },
   {
     "text": "The village forge opens at dawn and closes after dusk.",
+    "npc_id": null,
+    "location": "village_forge",
+    "quest_id": null,
+    "spoiler_level": 0,
+    "source_path": "app/lore/village_forge.md"
+  },
+  {
+    "text": "Rumors say miners avoid the old tunnels unless paid in advance.",
     "npc_id": null,
     "location": "village_forge",
     "quest_id": null,
